@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0A0A0A"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FUNCÕES DE PLAYER"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:paddingBottom="12dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:background="#111111">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Arma instantanea"
+                android:textColor="#CCCCCC" />
+
+            <Switch
+                android:id="@+id/swInstant"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:tag="Arma instantanea" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Speed"
+                android:textColor="#CCCCCC" />
+
+            <Switch
+                android:id="@+id/swSpeed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:tag="Speed" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Pulo alto"
+                android:textColor="#CCCCCC" />
+
+            <Switch
+                android:id="@+id/swHighJump"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:tag="Pulo alto" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnInject"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="20dp"
+        android:text="INJETAR"
+        android:textAllCaps="true"
+        android:background="@drawable/btn_gradient"
+        android:textColor="#FFFFFF" />
+
+</LinearLayout>
