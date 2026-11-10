@@ -39,7 +39,7 @@ router.get('/discord', async (req, res) => {
 
   try {
     const turnstileData = new URLSearchParams();
-    turnstileData.append('secret', '0x4AAAAAAEhh6NcYy4w1F6QT9fPzxETVd5A');
+    turnstileData.append('secret', '0x4AAAAAAF6178eJaWa8C0j3pyBOzcD4KF4');
     turnstileData.append('response', turnstileToken);
     turnstileData.append('remoteip', getClientIp(req));
 
@@ -134,7 +134,7 @@ router.post('/login', async (req, res) => {
 
     try {
       const turnstileData = new URLSearchParams();
-      turnstileData.append('secret', '0x4AAAAAAEhh6NcYy4w1F6QT9fPzxETVd5A');
+      turnstileData.append('secret', '0x4AAAAAAF6178eJaWa8C0j3pyBOzcD4KF4');
       turnstileData.append('response', turnstileToken);
       turnstileData.append('remoteip', getClientIp(req));
 

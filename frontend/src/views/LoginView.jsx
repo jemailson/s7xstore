@@ -39,7 +39,7 @@ export default function LoginView({ onLogin }) {
     window.onloadTurnstileCallback = function () {
       if (window.turnstile) {
         widgetId = window.turnstile.render('#cf-turnstile-widget', {
-          sitekey: '0x4AAAAAAEhh6FHdQE1VGC7t',
+          sitekey: '0x4AAAAAAF6173mQ-ddiI42m',
           theme: 'dark',
           callback: function(token) { setTurnstileToken(token) }
         })
@@ -48,7 +48,7 @@ export default function LoginView({ onLogin }) {
 
     if (window.turnstile) {
       widgetId = window.turnstile.render('#cf-turnstile-widget', {
-        sitekey: '0x4AAAAAAEhh6FHdQE1VGC7t',
+        sitekey: '0x4AAAAAAF6173mQ-ddiI42m',
         theme: 'dark',
         callback: function(token) { setTurnstileToken(token) }
       })
