@@ -1,4 +1,3 @@
-const Database = require('better-sqlite3');
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
@@ -34,6 +33,7 @@ function getDbInstance() {
     return pgPool;
   } else {
     if (!sqliteDb) {
+      const Database = require('better-sqlite3');
       const dir = path.dirname(path.resolve(config.dbPath));
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });

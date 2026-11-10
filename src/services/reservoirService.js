@@ -225,8 +225,23 @@ async function claimKey({ platform, durationDays, discordId, discordTag }) {
   });
 }
 
-async function listAvailableProducts() {
-  const platforms = await db.query("SELECT * FROM platforms WHERE status = 'active' ORDER BY name ASC");
+async function listAvailableProducts(user = null) {
+  let platforms = await db.query("SELECT * FROM platforms WHERE status = 'active' ORDER BY name ASC");
+
+  if (user && user.role !== 'owner' && user.role !== 'admin') {
+    const perms = await db.query(
+      'SELECT platform_slug, allowed FROM user_product_permissions WHERE user_id = ?',
+      [user.id]
+    );
+    const blockedSlugs = new Set(
+      perms
+        .filter(p => p.allowed === false || p.allowed === 0)
+        .map(p => String(p.platform_slug).toLowerCase())
+    );
+    if (blockedSlugs.size > 0) {
+      platforms = platforms.filter(p => !blockedSlugs.has(String(p.slug).toLowerCase()));
+    }
+  }
 
   const stockRows = await db.query(`
     SELECT platform, duration_days, COUNT(*) as count

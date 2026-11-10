@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
     }
 
     const search = String(req.query.search || '').trim();
-    const limit = Math.min(parseInt(req.query.limit || '100', 10), 200);
+    const limit = Math.min(parseInt(req.query.limit || '2000', 10), 5000);
     const offset = parseInt(req.query.offset || '0', 10);
 
     const profiles = await userService.listProfiles({
@@ -180,6 +180,7 @@ router.put('/:id/product-permissions', requireRoles(config.roles.OWNER, config.r
     for (const perm of permissions) {
       const { platform_slug, allowed } = perm;
       if (!platform_slug) continue;
+      const allowedVal = db.isPg ? Boolean(allowed) : (allowed ? 1 : 0);
       const existing = await db.queryOne(
         'SELECT id FROM user_product_permissions WHERE user_id = ? AND platform_slug = ?',
         [targetId, platform_slug]
@@ -187,12 +188,12 @@ router.put('/:id/product-permissions', requireRoles(config.roles.OWNER, config.r
       if (existing) {
         await db.run(
           'UPDATE user_product_permissions SET allowed = ? WHERE user_id = ? AND platform_slug = ?',
-          [allowed ? 1 : 0, targetId, platform_slug]
+          [allowedVal, targetId, platform_slug]
         );
       } else {
         await db.run(
           'INSERT INTO user_product_permissions (user_id, platform_slug, allowed) VALUES (?, ?, ?)',
-          [targetId, platform_slug, allowed ? 1 : 0]
+          [targetId, platform_slug, allowedVal]
         );
       }
     }

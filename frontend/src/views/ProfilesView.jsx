@@ -306,18 +306,16 @@ export default function ProfilesView({ user }) {
                             <>
                               <button className="btn btn-info btn-sm" onClick={() => { setShowCredits(p); setCrAmount(10); setCrSet('') }}>Créditos</button>
 
-                              {/* Permissões de produto — só para revendedores */}
-                              {p.role === 'reseller' && (
-                                <button
-                                  className="btn btn-secondary btn-sm"
-                                  onClick={() => openPerms(p)}
-                                  title="Configurar quais produtos este revendedor pode gerar"
-                                  style={{ display: 'flex', alignItems: 'center', gap: 4 }}
-                                >
-                                  <Shield size={12} />
-                                  Produtos
-                                </button>
-                              )}
+                              {/* Permissões de produto */}
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => openPerms(p)}
+                                title="Configurar quais produtos este usuário pode gerar"
+                                style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                              >
+                                <Shield size={12} />
+                                Produtos
+                              </button>
 
                               {/* Ban / Unban */}
                               {isBanned ? (

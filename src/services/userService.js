@@ -332,39 +332,76 @@ async function getKeyStatsForUser(userId) {
   return stats;
 }
 
-async function listProfiles({ actor, search = '', limit = 100, offset = 0 } = {}) {
+async function listProfiles({ actor, search = '', limit = 2000, offset = 0 } = {}) {
   let sql = 'SELECT * FROM users WHERE 1=1';
   const params = [];
 
-  if (actor.role === config.roles.ADMIN) {
-    sql += ' AND (parent_id = ? OR id = ?)';
-    params.push(actor.id, actor.id);
-  } else if (actor.role === config.roles.RESELLER) {
+  if (actor.role === config.roles.RESELLER) {
     sql += ' AND id = ?';
     params.push(actor.id);
   }
 
   if (search) {
-    sql += ' AND (username LIKE ? OR role LIKE ? OR reseller_type LIKE ? OR status LIKE ?)';
+    sql += ' AND (LOWER(username) LIKE LOWER(?) OR LOWER(role) LIKE LOWER(?) OR LOWER(COALESCE(reseller_type, \'\')) LIKE LOWER(?) OR LOWER(status) LIKE LOWER(?))';
     const term = `%${search}%`;
     params.push(term, term, term, term);
   }
 
-  sql += ' ORDER BY role ASC, username ASC LIMIT ? OFFSET ?';
+  sql += ` ORDER BY CASE role
+    WHEN 'owner' THEN 1
+    WHEN 'admin' THEN 2
+    WHEN 'reseller' THEN 3
+    WHEN 'download_admin' THEN 4
+    ELSE 5
+  END ASC, username ASC LIMIT ? OFFSET ?`;
   params.push(limit, offset);
 
   const users = await db.query(sql, params);
+  if (!users || users.length === 0) return [];
+
+  const allStatsRows = await db.query(`
+    SELECT user_id, status, COUNT(*) as count FROM keys GROUP BY user_id, status
+  `);
+  const statsByUser = {};
+  for (const row of allStatsRows) {
+    const uid = row.user_id;
+    if (!statsByUser[uid]) {
+      statsByUser[uid] = {
+        total: 0,
+        awaiting_activation: 0,
+        active: 0,
+        paused: 0,
+        expired: 0,
+        deactivated: 0
+      };
+    }
+    const cnt = parseInt(row.count || row.COUNT || 0, 10);
+    statsByUser[uid][row.status] = cnt;
+    statsByUser[uid].total += cnt;
+  }
+
+  const latestKeysRows = await db.query(`
+    SELECT user_id, device_id, device_info, activation_ip, activated_at
+    FROM keys
+    WHERE device_id IS NOT NULL
+    ORDER BY activated_at ASC
+  `);
+  const latestByUser = {};
+  for (const row of latestKeysRows) {
+    latestByUser[row.user_id] = row;
+  }
 
   const profilesWithStats = [];
   for (const user of users) {
-    const stats = await getKeyStatsForUser(user.id);
-    const latestKey = await db.queryOne(`
-      SELECT device_id, device_info, activation_ip, activated_at
-      FROM keys
-      WHERE user_id = ? AND device_id IS NOT NULL
-      ORDER BY activated_at DESC
-      LIMIT 1
-    `, [user.id]);
+    const stats = statsByUser[user.id] || {
+      total: 0,
+      awaiting_activation: 0,
+      active: 0,
+      paused: 0,
+      expired: 0,
+      deactivated: 0
+    };
+    const latestKey = latestByUser[user.id] || null;
 
     profilesWithStats.push({
       ...sanitizeUser(user),
@@ -408,8 +445,10 @@ async function canManageUser(actor, targetId) {
   if (actor.id === targetId) return true;
 
   if (actor.role === config.roles.ADMIN) {
-    const managed = await getManagedUserIds(actor.id);
-    return managed.includes(targetId);
+    const target = await findById(targetId);
+    if (!target) return false;
+    if (target.role === config.roles.OWNER || target.role === config.roles.ADMIN) return false;
+    return true;
   }
 
   return false;

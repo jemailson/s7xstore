@@ -179,7 +179,7 @@ router.get('/reservoir-stats', requireRoles(config.roles.OWNER, config.roles.ADM
 
 router.get('/products', async (req, res) => {
   try {
-    const products = await reservoirService.listAvailableProducts();
+    const products = await reservoirService.listAvailableProducts(req.user);
     return res.json({ products });
   } catch (err) {
     return res.status(400).json({ error: err.message });
