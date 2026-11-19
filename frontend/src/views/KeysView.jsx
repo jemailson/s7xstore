@@ -56,6 +56,11 @@ export default function KeysView({ user, onUserUpdate }) {
   const limit = 50
 
   const [quantity, setQuantity] = useState(1)
+  const [targetUserId, setTargetUserId] = useState('')
+  const [userList, setUserList] = useState([])
+  const [loadingUsers, setLoadingUsers] = useState(false)
+
+  const isAdminOrOwner = user?.role === 'admin' || user?.role === 'owner'
 
   const uniquePlatforms = useMemo(() => {
     const seen = new Set()
@@ -135,6 +140,20 @@ export default function KeysView({ user, onUserUpdate }) {
     }
   }
 
+  async function loadUsers() {
+    if (!isAdminOrOwner) return
+    setLoadingUsers(true)
+    try {
+      const data = await API.listUsers({ limit: 500, offset: 0 })
+      const list = (data.users || []).filter(u => u.role === 'reseller' || u.role === 'admin')
+      setUserList(list)
+    } catch {
+      // silencioso
+    } finally {
+      setLoadingUsers(false)
+    }
+  }
+
   useEffect(() => { loadKeys() }, [offset])
 
   function handleFilter() {
@@ -145,7 +164,9 @@ export default function KeysView({ user, onUserUpdate }) {
   function openModal() {
     setShowModal(true)
     setQuantity(1)
+    setTargetUserId('')
     loadProducts()
+    if (isAdminOrOwner) loadUsers()
   }
 
   async function handleClaim() {
@@ -159,11 +180,15 @@ export default function KeysView({ user, onUserUpdate }) {
     }
     setGenerating(true)
     try {
-      const res = await API.claimKeyFromStock({
+      const payload = {
         platform: selectedPlatform,
         duration_days: selectedDuration.days,
         quantity
-      })
+      }
+      if (isAdminOrOwner && targetUserId) {
+        payload.target_user_id = targetUserId
+      }
+      const res = await API.claimKeyFromStock(payload)
       if (res.keys && res.keys.length > 0) {
         setGeneratedKey(res.keys.map(k => k.key_code).join('\n'))
       }
@@ -412,6 +437,27 @@ export default function KeysView({ user, onUserUpdate }) {
                   }}
                 />
               </div>
+
+              {isAdminOrOwner && (
+                <div className="input-group" style={{ marginTop: '16px' }}>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 'bold', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '8px', display: 'block', color: 'var(--text-muted)' }}>
+                    Gerar para (opcional)
+                  </label>
+                  <select
+                    value={targetUserId}
+                    onChange={e => setTargetUserId(e.target.value)}
+                    style={{ width: '100%' }}
+                    disabled={loadingUsers}
+                  >
+                    <option value="">— Minha conta —</option>
+                    {userList.map(u => (
+                      <option key={u.id} value={u.id}>
+                        {u.username} ({u.role})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div style={{ marginTop: '16px', padding: '14px', background: 'rgba(139,92,246,0.06)', borderRadius: '10px', border: '1px solid rgba(139,92,246,0.2)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>

@@ -188,14 +188,21 @@ router.get('/products', async (req, res) => {
 
 router.post('/claim-from-stock', async (req, res) => {
   try {
-    const { platform, duration_days, quantity } = req.body || {};
+    const { platform, duration_days, quantity, target_user_id } = req.body || {};
     if (!platform) return res.status(400).json({ error: 'Produto não informado.' });
+
+    let userId = req.user.id;
+
+    // Admin/owner podem gerar para outro usuário
+    if (target_user_id && (req.user.role === config.roles.OWNER || req.user.role === config.roles.ADMIN)) {
+      userId = parseInt(target_user_id, 10);
+    }
 
     const keys = await reservoirService.claimKeyForUser({
       platform,
       durationDays: parseFloat(duration_days || 30),
       quantity,
-      userId: req.user.id,
+      userId,
       actor: req.user,
       ipAddress: getClientIp(req)
     });
