@@ -38,7 +38,7 @@ function canSee(page, role) {
   if (page === 'profiles' || page === 'logs') return role === 'owner' || role === 'admin'
   if (page === 'permissions' || page === 'bulk_keys') return role === 'owner'
   if (page === 'public_files') return role === 'owner' || role === 'admin'
-  if (page === 'keys') return role === 'reseller'
+  if (page === 'keys') return role === 'reseller' || role === 'admin' || role === 'owner'
   return true
 }
 
