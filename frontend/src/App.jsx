@@ -42,7 +42,7 @@ function PanelView({ user, onLogout, onUserUpdate }) {
     if ((p === 'permissions' || p === 'bulk_keys') && role !== 'owner') {
       p = 'dashboard'
     }
-    if (p === 'keys' && role !== 'reseller' && role !== 'owner') {
+    if (p === 'keys' && role !== 'reseller' && role !== 'owner' && role !== 'admin') {
       p = 'dashboard'
     }
     setPage(p)
